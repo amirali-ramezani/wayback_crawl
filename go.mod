@@ -1,3 +1,3 @@
-module github.com/amirali-ramezani/wayback_crawl
+module wayback_crawl
 
 go 1.23.6
