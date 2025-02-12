@@ -1,4 +1,4 @@
-package javascript
+package robots
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func FindJSURLs(inputFile string, outputFile string) error {
+func FindRobotsTxtURLs(inputFile string, outputFile string) error {
 	file, err := os.Open(inputFile)
 	if err != nil {
 		return fmt.Errorf("error opening input file: %w", err)
@@ -23,8 +23,8 @@ func FindJSURLs(inputFile string, outputFile string) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		url := scanner.Text()
-		if strings.Contains(url, ".js") {
-			output.WriteString(url + "\n")
+		if strings.Contains(url, "robots.txt") {
+			output.WriteString(url + "\n") 
 		}
 	}
 
@@ -33,3 +33,4 @@ func FindJSURLs(inputFile string, outputFile string) error {
 	}
 	return nil
 }
+

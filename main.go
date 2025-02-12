@@ -7,7 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"wayback_crawl/javascript" 
+	"wayback_crawl/javascript"
+	"wayback_crawl/robots"    
 )
 
 type WaybackResponse [][]string
@@ -15,7 +16,7 @@ type WaybackResponse [][]string
 func main() {
 	domains := []string{"kifpool.me", "kifpool.app"}
 
-	// Create the file to store URLs
+	
 	file, err := os.Create("urls.txt")
 	if err != nil {
 		fmt.Println("Error creating file:", err)
@@ -23,18 +24,18 @@ func main() {
 	}
 	defer file.Close()
 
-	// Map to store unique URLs
+	
 	uniqueUrls := make(map[string]struct{})
 
-	// Fetch URLs for each domain
+	
 	for _, domain := range domains {
 		file.WriteString("Results for domain: " + domain + "\n")
 
-		// Run external commands to gather URLs
+		
 		runCommand(file, domain, "gau", []string{"--threads", "5"}, uniqueUrls)
 		runCommand(file, domain, "waybackurls", []string{}, uniqueUrls)
 
-		// Fetch URLs from web archive (Wayback Machine)
+		
 		url := fmt.Sprintf("https://web.archive.org/cdx/search/cdx?url=%s/*&output=json&collapse=urlkey", domain)
 		resp, err := http.Get(url)
 		if err != nil {
@@ -48,14 +49,14 @@ func main() {
 			continue
 		}
 
-		// Parse JSON response
+		
 		var data WaybackResponse
 		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 			fmt.Println("Error decoding JSON for domain", domain, ":", err)
 			continue
 		}
 
-		// Save unique URLs from the web archive
+		
 		for _, entry := range data {
 			if len(entry) > 2 {
 				url := entry[2]
@@ -69,13 +70,19 @@ func main() {
 		file.WriteString("\n")
 	}
 
-	// Print success message
+	
 	fmt.Println("URLs saved to urls.txt successfully!")
 
-	// Now, use the javascript package to find and print .js URLs
-	err = javascript.FindJSURLs("urls.txt")
+	
+	err = javascript.FindJSURLs("urls.txt","jsresults.txt")
 	if err != nil {
 		fmt.Println("Error finding .js URLs:", err)
+	}
+
+	
+	err = robots.FindRobotsTxtURLs("urls.txt","robotsresult.txt")
+	if err != nil {
+		fmt.Println("Error checking robots.txt files:", err)
 	}
 }
 
@@ -117,4 +124,3 @@ func isExcluded(url string) bool {
 	}
 	return false
 }
-
